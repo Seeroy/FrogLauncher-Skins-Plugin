@@ -60,6 +60,7 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	public void updatePlayerSkin(Player p) {
+		// Получаем данные из API
 		HttpURLConnection connection = null;
 		try {
 			connection = (HttpURLConnection) new URL(skinsApiUrl + p.getName()).openConnection();
@@ -74,6 +75,13 @@ public class Main extends JavaPlugin implements Listener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		// Если код 204, то скина нет
+		if(responseCode == 204) {
+			getLogger().info("Skin for " + ChatColor.AQUA + p.getName() + ChatColor.RESET + " not found");
+			return;
+		}
+		
 		InputStream inputStream = null;
 		if (200 <= responseCode && responseCode <= 299) {
 			try {
@@ -87,6 +95,7 @@ public class Main extends JavaPlugin implements Listener {
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
 
+		// Парсим ответ сервера
 		StringBuilder response = new StringBuilder();
 		String currentLine;
 
@@ -103,10 +112,12 @@ public class Main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 
+		// Парсим JSON
 		String resp = response.toString();
 		JsonParser parser = new JsonParser();
 		JsonObject mainObject = parser.parse(resp).getAsJsonObject();
 
+		// Ищем value и signature скина
 		String skinData = mainObject.get("value").getAsString();
 		String skinSignature = mainObject.get("signature").getAsString();
 		
@@ -118,6 +129,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		String skin = p.getName();
 		try {
+			// Загружаем скин с помощью SkinsRestorerAPI
 			SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();
 			skinStorage.setCustomSkinData(p.getName(), SkinProperty.of(skinData, skinSignature));
 			Optional<InputDataResult> result = skinStorage.findOrCreateSkinData(skin);
