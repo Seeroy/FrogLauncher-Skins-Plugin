@@ -1,0 +1,6 @@
+name: FrogSkinsSupport
+version: 1.0
+author: seeeroy
+website: https://froglauncher.ru
+main: ru.seeeroy.frogSkinsSupport.Main
+softdepend: [ "SkinsRestorer" ]
